@@ -21,9 +21,29 @@ At first, it is needed to prepare STM32H5 device and configure its ***Option Byt
 
 ![](imgs/TZYes.png)
 
+Configure PI1 pin as GPIO output push/pull and add User Label "GREEN_LED".
 ![](imgs/PinMX.png)
 
 ## Open the project in STM32CubeIDE
+
+Add these lines in Non-Secure main.c which make the green LED blink:
+
+```cpp
+int main(void)
+{
+...
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	  HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
+	  HAL_Delay(250);
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
+}
+```
 
 ### Setup Debug
 
@@ -36,3 +56,17 @@ STM32H5 Series devices always boot in secure state when ***TrustZone®*** is ena
 When you run debug next time, be sure to select Secure project when launching debug.
 
 ![](imgs/Launch.png)
+
+If you run the application you should see the LD6 blinking.
+
+## Add TouchGFX SW packgage X-CUBE-TouchGFX
+
+![](imgs/OpenSWPacks.png)
+
+![](imgs/SWPacksTGFX.png)
+
+![](imgs/EnableTGFX.png)
+
+Solve the Dependencies error. The TouchGFX needs to have available CRC peripheral to proper function. You don't need to configure the CRC peripheral, just activate it using check box.
+
+![](imgs/ActivateCRC.png)

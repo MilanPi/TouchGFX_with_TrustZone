@@ -29,6 +29,7 @@
 		<nature>com.st.stm32cube.ide.mcu.MCUSingleCpuProjectNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
+		<nature>org.eclipse.cdt.core.ccnature</nature>
 	</natures>
 	<linkedResources>
 		<link>
@@ -40,6 +41,16 @@
 			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_cortex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_cortex.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_crc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_crc.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_crc_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_crc_ex.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_dma.c</name>
