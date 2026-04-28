@@ -259,7 +259,7 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOI_CLK_ENABLE();
 
   /*IO attributes management functions */
   HAL_GPIO_ConfigPinAttributes(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_NSEC);
