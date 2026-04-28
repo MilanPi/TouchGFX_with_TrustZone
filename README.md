@@ -32,3 +32,7 @@ At first, it is needed to prepare STM32H5 device and configure its ***Option Byt
 STM32H5 Series devices always boot in secure state when ***TrustZone®*** is enabled. The debugger sets the ***Program Counter*** using information from the last image in the ***Load image*** and ***Symbols*** table. Make sure the **secure** image is **at the bottom** of the load list.
 
 ![](imgs/SecureBottom.png)
+
+When you run debug next time, be sure to select Secure project when launching debug.
+
+![](imgs/Launch.png)
