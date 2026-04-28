@@ -25,7 +25,7 @@ Configure PI1 pin as GPIO output push/pull and add User Label "GREEN_LED":
 
 ![](imgs/PinMX.png)
 
-Give the project some name and don't forgot to **uncheck** "Generate Under Root":
+Give the project some name and don't forgot to **uncheck** "Generate Under Root" (this is required by TouchGFX project which will be added later. TouchGFX generator needs to touch .cprojet file and if generated under root, TouchGFX will not find that project file):
 
 ![](imgs/UnderRoot.png)
 
