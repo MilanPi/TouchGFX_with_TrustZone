@@ -21,8 +21,13 @@ At first, it is needed to prepare STM32H5 device and configure its ***Option Byt
 
 ![](imgs/TZYes.png)
 
-Configure PI1 pin as GPIO output push/pull and add User Label "GREEN_LED".
+Configure PI1 pin as GPIO output push/pull and add User Label "GREEN_LED":
+
 ![](imgs/PinMX.png)
+
+Give the project some name and don't forgot to **uncheck** "Generate Under Root":
+
+![](imgs/UnderRoot.png)
 
 ## Open the project in STM32CubeIDE
 
@@ -70,3 +75,12 @@ If you run the application you should see the LD6 blinking.
 Solve the Dependencies error. The TouchGFX needs to have available CRC peripheral to proper function. You don't need to configure the CRC peripheral, just activate it using check box.
 
 ![](imgs/ActivateCRC.png)
+
+If you generate by CubeMX the project now (just enabling TouchGFX and CRC) and then try to build the project, you will receive an errors, because the project is not complete.
+
+![](imgs/Errors.png)
+
+We must generate project in the TouchGFX Designer to have complete project.
+
+1) Open the .touchgfx.part partial project file located in /NonSecure/TouchGFX/:
+![](imgs/part.png)
