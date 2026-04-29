@@ -54,7 +54,7 @@ int main(void)
 
 ![](imgs/DebugSetup.png)
 
-STM32H5 Series devices always boot in secure state when ***TrustZone®*** is enabled. The debugger sets the ***Program Counter*** using information from the last image in the ***Load image*** and ***Symbols*** table. Make sure the **secure** image is **at the bottom** of the load list.
+The application boots in a secure state when ***TrustZone®*** is enabled. The debugger sets the ***Program Counter*** using information from the last image in the ***Load image*** and ***Symbols*** table. Make sure the **secure** image is **at the bottom** of the load list.
 
 ![](imgs/SecureBottom.png)
 
