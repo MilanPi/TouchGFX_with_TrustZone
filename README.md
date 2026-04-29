@@ -62,13 +62,19 @@ When you run debug next time, be sure to select Secure project when launching de
 
 ![](imgs/Launch.png)
 
-If you run the application you should see the LD6 blinking.
+If you run the application you should see the LD6 blinking. This is to verify we have working Secure and Non-Secure application setup and we are able to debug it.
 
 ## Add TouchGFX SW packgage X-CUBE-TouchGFX
 
+Go to ***Software Packs*** drop down menu and click ***Select Components*** option.
+
 ![](imgs/OpenSWPacks.png)
 
+In the ***Software Packs Component Selector*** be sure to select ***Cortex-M33 non secure*** context because the TouchGFX can run only in non secure context.
+
 ![](imgs/SWPacksTGFX.png)
+
+Then we need to activate TouchGFX middleware.
 
 ![](imgs/EnableTGFX.png)
 
@@ -76,11 +82,24 @@ Solve the Dependencies error. The TouchGFX needs to have available CRC periphera
 
 ![](imgs/ActivateCRC.png)
 
+You can change display width and height and set framebuffer (FB) strategy to Partial FB.
+
 If you generate by CubeMX the project now (just enabling TouchGFX and CRC) and then try to build the project, you will receive an errors, because the project is not complete.
 
 ![](imgs/Errors.png)
 
 We must generate project in the TouchGFX Designer to have complete project.
 
-1) Open the .touchgfx.part partial project file located in /NonSecure/TouchGFX/:
+1) Open the ***.touchgfx.part*** partial project file located in /NonSecure/TouchGFX/:
+
 ![](imgs/part.png)
+
+2) This will open the project in the ***TouchGFX Designer***. There you can select ***blank UI*** for initial project and click on ***Import*** button.
+
+![](imgs/TouchGFXDesigner-BlankUI.png)
+
+3) Now just click Generate button (or press F4) to generate TouchGFX project.
+
+![](imgs/TouchGFXDesignergenerate.png)
+
+4) You should see green label at the bottom status bar informing about successfull generation.
