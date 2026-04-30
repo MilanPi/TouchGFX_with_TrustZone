@@ -61,6 +61,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LED_GREEN_Pin GPIO_PIN_1
 #define LED_GREEN_GPIO_Port GPIOI
+#define LCD_RESET_Pin GPIO_PIN_13
+#define LCD_RESET_GPIO_Port GPIOH
 
 /* USER CODE BEGIN Private defines */
 
