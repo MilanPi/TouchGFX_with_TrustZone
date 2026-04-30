@@ -54,14 +54,16 @@ static volatile bool refreshRequested = false;
 static uint16_t* TFTframebuffer = 0;
 extern "C" DMA_HandleTypeDef handle_GPDMA2_Channel6;
 
-__weak void LCD_IO_Init(void);
-__weak void LCD_IO_WriteData(uint16_t RegValue);
-__weak void LCD_IO_WriteMultipleData(uint16_t* pData, uint32_t Size);
-__weak void LCD_IO_WriteReg(uint8_t Reg);
-__weak uint16_t LCD_IO_ReadData(void);
-__weak void LCD_IO_Delay(uint32_t Delay);
+extern "C"
+{
+    void     LCD_IO_WriteReg(uint8_t Reg);        //defined in TouchGFXGeneratedHAL.cpp
+    void     LCD_IO_WriteData(uint16_t RegValue); //defined in TouchGFXGeneratedHAL.cpp
+}
 
 void initLCD(void);
+
+static void DMA_TxCpltCallback(DMA_HandleTypeDef* hdma);
+static void DMA_TxErrorCallback(DMA_HandleTypeDef* hdma);
 
 using namespace touchgfx;
 
@@ -74,6 +76,9 @@ void TouchGFXHAL::initialize()
     // Please note, HAL::initialize() must be called to initialize the framework.
 
 	initLCD();
+
+    HAL_DMA_RegisterCallback(&handle_GPDMA2_Channel6, HAL_DMA_XFER_CPLT_CB_ID, DMA_TxCpltCallback);
+    HAL_DMA_RegisterCallback(&handle_GPDMA2_Channel6, HAL_DMA_XFER_ERROR_CB_ID, DMA_TxErrorCallback);
 
     TouchGFXGeneratedHAL::initialize();
 }
