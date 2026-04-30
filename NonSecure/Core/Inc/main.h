@@ -62,10 +62,14 @@ void Error_Handler(void);
 #define LCD_TE_Pin GPIO_PIN_3
 #define LCD_TE_GPIO_Port GPIOD
 #define LCD_TE_EXTI_IRQn EXTI3_IRQn
+#define LCD_BL_CTRL_Pin GPIO_PIN_3
+#define LCD_BL_CTRL_GPIO_Port GPIOI
 #define LED_GREEN_Pin GPIO_PIN_1
 #define LED_GREEN_GPIO_Port GPIOI
 #define LCD_RESET_Pin GPIO_PIN_13
 #define LCD_RESET_GPIO_Port GPIOH
+#define LCD_DISP_Pin GPIO_PIN_6
+#define LCD_DISP_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
 

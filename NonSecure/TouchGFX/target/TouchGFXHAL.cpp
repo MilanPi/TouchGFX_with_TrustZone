@@ -95,7 +95,8 @@ uint16_t* TouchGFXHAL::getTFTFrameBuffer() const
     // To overwrite the generated implementation, omit the call to the parent function
     // and implement the needed functionality here.
 
-    return TouchGFXGeneratedHAL::getTFTFrameBuffer();
+    //return TouchGFXGeneratedHAL::getTFTFrameBuffer();
+	return TFTframebuffer;
 }
 
 /**
@@ -109,6 +110,8 @@ void TouchGFXHAL::setTFTFrameBuffer(uint16_t* address)
     //
     // To overwrite the generated implementation, omit the call to the parent function
     // and implement the needed functionality here.
+
+	TFTframebuffer = address;
 
     TouchGFXGeneratedHAL::setTFTFrameBuffer(address);
 }
@@ -164,6 +167,8 @@ void TouchGFXHAL::enableInterrupts()
     // To overwrite the generated implementation, omit the call to the parent function
     // and implement the needed functionality here.
 
+    HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+
     TouchGFXGeneratedHAL::enableInterrupts();
 }
 
@@ -176,6 +181,8 @@ void TouchGFXHAL::disableInterrupts()
     //
     // To overwrite the generated implementation, omit the call to the parent function
     // and implement the needed functionality here.
+
+    HAL_NVIC_DisableIRQ(EXTI3_IRQn);
 
     TouchGFXGeneratedHAL::disableInterrupts();
 }
@@ -196,12 +203,19 @@ void TouchGFXHAL::enableLCDControllerInterrupt()
 
 bool TouchGFXHAL::beginFrame()
 {
+	refreshRequested = false;
+
     return TouchGFXGeneratedHAL::beginFrame();
 }
 
 void TouchGFXHAL::endFrame()
 {
     TouchGFXGeneratedHAL::endFrame();
+
+    if (frameBufferUpdatedThisFrame)
+    {
+        refreshRequested = true;
+    }
 }
 
 __STATIC_INLINE HAL_StatusTypeDef GPDMA_Queue_Config(DMA_QListTypeDef* Queue, uint8_t node_cnt, uint8_t* src, uint8_t* dst, uint32_t data_size)
