@@ -55,7 +55,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern DMA_HandleTypeDef handle_GPDMA2_Channel6;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -139,6 +139,34 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32h5xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles EXTI Line3 interrupt.
+  */
+void EXTI3_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI3_IRQn 0 */
+
+  /* USER CODE END EXTI3_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(LCD_TE_Pin);
+  /* USER CODE BEGIN EXTI3_IRQn 1 */
+
+  /* USER CODE END EXTI3_IRQn 1 */
+}
+
+/**
+  * @brief This function handles GPDMA2 Channel 6 global interrupt.
+  */
+void GPDMA2_Channel6_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA2_Channel6_IRQn 0 */
+
+  /* USER CODE END GPDMA2_Channel6_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA2_Channel6);
+  /* USER CODE BEGIN GPDMA2_Channel6_IRQn 1 */
+
+  /* USER CODE END GPDMA2_Channel6_IRQn 1 */
+}
 
 /* USER CODE BEGIN 1 */
 

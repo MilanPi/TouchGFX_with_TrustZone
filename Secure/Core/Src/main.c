@@ -266,9 +266,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOE_CLK_ENABLE();
 
   /*IO attributes management functions */
-  HAL_GPIO_ConfigPinAttributes(GPIOD, GPIO_PIN_7|GPIO_PIN_5|GPIO_PIN_1|GPIO_PIN_4
-                          |GPIO_PIN_0|GPIO_PIN_15|GPIO_PIN_10|GPIO_PIN_14
-                          |GPIO_PIN_9|GPIO_PIN_8, GPIO_PIN_NSEC);
+  HAL_GPIO_ConfigPinAttributes(GPIOD, GPIO_PIN_7|GPIO_PIN_5|LCD_TE_Pin|GPIO_PIN_1
+                          |GPIO_PIN_4|GPIO_PIN_0|GPIO_PIN_15|GPIO_PIN_10
+                          |GPIO_PIN_14|GPIO_PIN_9|GPIO_PIN_8, GPIO_PIN_NSEC);
 
   /*IO attributes management functions */
   HAL_GPIO_ConfigPinAttributes(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_NSEC);

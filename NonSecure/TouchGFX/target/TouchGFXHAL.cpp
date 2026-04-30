@@ -27,6 +27,7 @@
 #include <TouchGFXGeneratedHAL.hpp>
 #include "stm32h5xx_hal.h"
 #include "main.h"
+#include <touchgfx/hal/OSWrappers.hpp>
 
 /**
   * @brief  ST7789H2 Registers
@@ -43,6 +44,15 @@
 #define ST7789H2_NV_GAMMA_CTRL                0xE1U /* Negative voltage */
 
 #define ST7789H2_FORMAT_RBG565                0x05U /* Pixel format chosen is RGB565 : 16 bpp */
+
+#define FMC_BANK1_REG ((uint16_t *) 0x60000000)
+#define FMC_BANK1_MEM ((uint16_t *) 0x60000002)
+
+volatile bool firstFrameReadyToDisplay = false;
+static volatile bool dmaCompleted = true;
+static volatile bool refreshRequested = false;
+static uint16_t* TFTframebuffer = 0;
+extern "C" DMA_HandleTypeDef handle_GPDMA2_Channel6;
 
 __weak void LCD_IO_Init(void);
 __weak void LCD_IO_WriteData(uint16_t RegValue);
@@ -189,6 +199,251 @@ void TouchGFXHAL::endFrame()
     TouchGFXGeneratedHAL::endFrame();
 }
 
+__STATIC_INLINE HAL_StatusTypeDef GPDMA_Queue_Config(DMA_QListTypeDef* Queue, uint8_t node_cnt, uint8_t* src, uint8_t* dst, uint32_t data_size)
+{
+    static DMA_NodeTypeDef  Nodes[(((240 * 240 * 2) / ((64 * 1024) - 2)) + 1)];
+    HAL_StatusTypeDef ret = HAL_OK;
+    /* DMA node configuration declaration */
+    DMA_NodeConfTypeDef pNodeConfig;
+    uint8_t i;
+
+    /* Set node configuration ################################################*/
+    pNodeConfig.NodeType = DMA_GPDMA_2D_NODE;
+    pNodeConfig.Init.Request = DMA_REQUEST_SW;
+    pNodeConfig.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
+    pNodeConfig.Init.Direction = DMA_MEMORY_TO_MEMORY;
+    pNodeConfig.Init.SrcInc = DMA_SINC_INCREMENTED;
+    pNodeConfig.Init.DestInc = DMA_DINC_FIXED;
+    pNodeConfig.Init.SrcDataWidth = DMA_SRC_DATAWIDTH_HALFWORD;
+    pNodeConfig.Init.DestDataWidth = DMA_DEST_DATAWIDTH_HALFWORD;
+    pNodeConfig.Init.SrcBurstLength = 1;
+    pNodeConfig.Init.DestBurstLength = 1;
+    pNodeConfig.Init.TransferAllocatedPort = DMA_SRC_ALLOCATED_PORT0 | DMA_DEST_ALLOCATED_PORT0;
+    pNodeConfig.Init.TransferEventMode = DMA_TCEM_LAST_LL_ITEM_TRANSFER;
+    pNodeConfig.RepeatBlockConfig.RepeatCount = 1;
+    pNodeConfig.RepeatBlockConfig.SrcAddrOffset = 0;
+    pNodeConfig.RepeatBlockConfig.DestAddrOffset = 0;
+    pNodeConfig.RepeatBlockConfig.BlkSrcAddrOffset = 0;
+    pNodeConfig.RepeatBlockConfig.BlkDestAddrOffset = 0;
+    pNodeConfig.TriggerConfig.TriggerPolarity = DMA_TRIG_POLARITY_MASKED;
+    pNodeConfig.DataHandlingConfig.DataExchange = DMA_EXCHANGE_NONE;
+    pNodeConfig.DataHandlingConfig.DataAlignment = DMA_DATA_RIGHTALIGN_ZEROPADDED;
+    pNodeConfig.SrcAddress = (uint32_t) src;
+    pNodeConfig.DstAddress = (uint32_t) dst;
+    if (node_cnt > 1)
+    {
+        pNodeConfig.DataSize = ((64 * 1024) - 2);
+    }
+    else
+    {
+        pNodeConfig.DataSize = data_size;
+    }
+
+    for (i = 0; ((ret == HAL_OK) && (i < node_cnt)); i++)
+    {
+        if (i == 0)
+        {
+            /* Reset The Queue */
+            ret = HAL_DMAEx_List_ResetQ(Queue);
+            if (ret != HAL_OK)
+            {
+                return ret;
+            }
+            /* Build Node first Node */
+            ret = HAL_DMAEx_List_BuildNode(&pNodeConfig, &Nodes[i]);
+            if (ret != HAL_OK)
+            {
+                return ret;
+            }
+            /* Insert Node to Queue */
+            ret = HAL_DMAEx_List_InsertNode_Head(Queue, &Nodes[i]);
+            if (ret != HAL_OK)
+            {
+                return ret;
+            }
+        }
+        else
+        {
+            /* Adjust size of last node */
+            if ((node_cnt > 1) && (i == (node_cnt - 1)))
+            {
+                pNodeConfig.DataSize = (data_size - (i * ((64 * 1024) - 2)));
+            }
+            /* Build Node Node */
+            ret = HAL_DMAEx_List_BuildNode(&pNodeConfig, &Nodes[i]);
+            if (ret != HAL_OK)
+            {
+                return ret;
+            }
+            /* Insert Node to Queue */
+            ret = HAL_DMAEx_List_InsertNode_Tail(Queue, &Nodes[i]);
+            if (ret != HAL_OK)
+            {
+                return ret;
+            }
+        }
+        pNodeConfig.SrcAddress += ((64 * 1024) - 2);
+    }
+
+    return ret;
+}
+
+static int32_t LCD_IO_SendDataDMA(uint8_t* pData, uint32_t Length)
+{
+    static DMA_QListTypeDef Queue;
+    uint32_t len = Length;
+    uint8_t node_cnt = (len / ((64 * 1024) - 2));
+
+    if (len % ((64 * 1024) - 2))
+    {
+        node_cnt++;
+    }
+
+    if ((handle_GPDMA2_Channel6.Mode & DMA_LINKEDLIST) == DMA_LINKEDLIST)
+    {
+        if (GPDMA_Queue_Config(&Queue, node_cnt, pData, (uint8_t*)FMC_BANK1_MEM, len) != HAL_OK)
+        {
+            return -1;
+        }
+
+        /* Link created queue to DMA channel #######################################*/
+        if (HAL_DMAEx_List_LinkQ(&handle_GPDMA2_Channel6, &Queue) != HAL_OK)
+        {
+            return -1;
+        }
+
+        /* Enable All the DMA interrupts */
+        if (HAL_DMAEx_List_Start_IT(&handle_GPDMA2_Channel6) != HAL_OK)
+        {
+            return -1;
+        }
+    }
+    else
+    {
+        if (node_cnt > 1)
+        {
+            return -1;
+        }
+
+        switch (handle_GPDMA2_Channel6.Init.DestDataWidth)
+        {
+        case DMA_DEST_DATAWIDTH_WORD :
+            len = (Length / 4);
+            break;
+        case DMA_DEST_DATAWIDTH_BYTE :
+            len = Length;
+            break;
+        default:
+        case DMA_DEST_DATAWIDTH_HALFWORD :
+            len = (Length / 2);
+            break;
+        }
+
+        if (HAL_DMA_Start_IT(&handle_GPDMA2_Channel6, (uint32_t)pData, (uint32_t)FMC_BANK1_MEM, len) != HAL_OK)
+        {
+            /* Transfer Error */
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+void LCD_SignalTransferDone(uint32_t Instance)
+{
+    if (Instance == 0)
+    {
+        dmaCompleted = true;
+    }
+}
+
+static void DMA_TxCpltCallback(DMA_HandleTypeDef* hdma)
+{
+    if (hdma == &handle_GPDMA2_Channel6)
+    {
+        /* Signal Transfer Done Event */
+        LCD_SignalTransferDone(0);
+    }
+}
+
+static void DMA_TxErrorCallback(DMA_HandleTypeDef* hdma)
+{
+    __disable_irq();
+    while (1)
+    {
+    }
+}
+
+void setWindow(uint32_t Xpos, uint32_t Ypos, uint32_t Xwidth, uint32_t Ywidth)
+{
+    // set pixel x pos:
+    LCD_IO_WriteReg(ST7789H2_CASET);
+
+    LCD_IO_WriteData(Xpos >> 8);                   /* XS[15:8] */
+    LCD_IO_WriteData((uint8_t)Xpos);               /* XS[7:0] */
+    LCD_IO_WriteData((Xpos + Xwidth - 1) >> 8);        /* XE[15:8] */
+    LCD_IO_WriteData((uint8_t)(Xpos + Xwidth - 1));    /* XE[7:0] */
+
+
+    // set pixel y pos:
+    LCD_IO_WriteReg(ST7789H2_RASET);
+
+    LCD_IO_WriteData(Ypos >> 8);                 /* YS[15:8] */
+    LCD_IO_WriteData((uint8_t)Ypos);             /* YS[7:0] */
+    LCD_IO_WriteData((Ypos + Ywidth - 1) >> 8);        /* YE[15:8] */
+    LCD_IO_WriteData((uint8_t)(Ypos + Ywidth - 1));    /* YE[7:0] */
+}
+
+void LCD_SignalTearingEffectEvent(void)
+{
+    // VSync has occurred, increment TouchGFX engine vsync counter
+    HAL::getInstance()->vSync();
+    // VSync has occurred, signal TouchGFX engine
+    OSWrappers::signalVSync();
+
+    if (!dmaCompleted)
+    {
+        if (HAL_DMAEx_List_DeInit(&handle_GPDMA2_Channel6) != HAL_OK)
+        {
+            Error_Handler();
+        }
+        if (HAL_DMAEx_List_Init(&handle_GPDMA2_Channel6) != HAL_OK)
+        {
+            Error_Handler();
+        }
+
+        HAL_DMA_RegisterCallback(&handle_GPDMA2_Channel6, HAL_DMA_XFER_CPLT_CB_ID, DMA_TxCpltCallback);
+
+        dmaCompleted = true;
+    }
+
+    if (refreshRequested)
+    {
+        // Swap frame buffers immediately instead of waiting for the task to be scheduled in.
+        // Note: task will also swap when it wakes up, but that operation is guarded and will not have
+        // any effect if already swapped.
+
+        touchgfx::HAL::getInstance()->swapFrameBuffers();
+
+        // Set window, enable display reading to GRAM, transmit buffer using DMA
+        setWindow(0, 0, 240, 240);
+        LCD_IO_WriteReg(ST7789H2_WRITE_RAM);
+        dmaCompleted = false;
+        LCD_IO_SendDataDMA((uint8_t*)TFTframebuffer, (240 * 240 * 2));
+    }
+}
+
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == LCD_TE_Pin)
+    {
+        // Set VSYNC_FREQ GPIO Pin
+        //GPIO::set(GPIO::VSYNC_FREQ);
+
+        LCD_SignalTearingEffectEvent();
+    }
+}
+
 void initLCD(void)
 {
     /* Reset ST7789H2 */
@@ -231,26 +486,6 @@ void initLCD(void)
     /* Tearing effect line on */
     LCD_IO_WriteReg(ST7789H2_TE_LINE_ON);
     LCD_IO_WriteData(0x00); // TE Mode 1
-}
-
-void setWindow(uint32_t Xpos, uint32_t Ypos, uint32_t Xwidth, uint32_t Ywidth)
-{
-    // set pixel x pos:
-    LCD_IO_WriteReg(ST7789H2_CASET);
-
-    LCD_IO_WriteData(Xpos >> 8);                   /* XS[15:8] */
-    LCD_IO_WriteData((uint8_t)Xpos);               /* XS[7:0] */
-    LCD_IO_WriteData((Xpos + Xwidth - 1) >> 8);        /* XE[15:8] */
-    LCD_IO_WriteData((uint8_t)(Xpos + Xwidth - 1));    /* XE[7:0] */
-
-
-    // set pixel y pos:
-    LCD_IO_WriteReg(ST7789H2_RASET);
-
-    LCD_IO_WriteData(Ypos >> 8);                 /* YS[15:8] */
-    LCD_IO_WriteData((uint8_t)Ypos);             /* YS[7:0] */
-    LCD_IO_WriteData((Ypos + Ywidth - 1) >> 8);        /* YE[15:8] */
-    LCD_IO_WriteData((uint8_t)(Ypos + Ywidth - 1));    /* YE[7:0] */
 }
 
 

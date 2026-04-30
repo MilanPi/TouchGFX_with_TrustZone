@@ -393,7 +393,7 @@
 //   <o.11> EXTI0_IRQn            <0=> Secure state
 //   <o.12> EXTI1_IRQn            <0=> Secure state
 //   <o.13> EXTI2_IRQn            <0=> Secure state
-//   <o.14> EXTI3_IRQn            <0=> Secure state
+//   <o.14> EXTI3_IRQn            <1=> Non-Secure state
 //   <o.15> EXTI4_IRQn            <0=> Secure state
 //   <o.16> EXTI5_IRQn            <0=> Secure state
 //   <o.17> EXTI6_IRQn            <0=> Secure state
@@ -412,7 +412,7 @@
 //   <o.30> GPDMA1_Channel3_IRQn  <0=> Secure state
 //   <o.31> GPDMA1_Channel4_IRQn  <0=> Secure state
 */
-#define NVIC_INIT_ITNS0_VAL      0x00000000
+#define NVIC_INIT_ITNS0_VAL      0x00004000
 
 /*
 //   </e>
@@ -517,7 +517,7 @@
 
 /*
 // Interrupts 96..127
-//   <o.0>  GPDMA2_Channel6_IRQn  <0=> Secure state
+//   <o.0>  GPDMA2_Channel6_IRQn  <1=> Non-Secure state
 //   <o.1>  GPDMA2_Channel7_IRQn  <0=> Secure state
 //   <o.2>  UART7_IRQn            <0=> Secure state
 //   <o.3>  UART8_IRQn            <0=> Secure state
@@ -550,7 +550,7 @@
 //   <o.30> I2C4_ER_IRQn          <0=> Secure state
 //   <o.31> LPTIM3_IRQn           <0=> Secure state
 */
-#define NVIC_INIT_ITNS3_VAL      0x00000000
+#define NVIC_INIT_ITNS3_VAL      0x00000001
 
 /*
 //   </e>
