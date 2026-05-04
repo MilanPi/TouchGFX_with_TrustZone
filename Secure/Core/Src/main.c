@@ -157,11 +157,22 @@ static void MX_GTZC_S_Init(void)
 
   /* USER CODE END GTZC_S_Init 0 */
 
+  MPCWM_ConfigTypeDef MPCWM_Area_Desc = {0};
   MPCBB_ConfigTypeDef MPCBB_Area_Desc = {0};
 
   /* USER CODE BEGIN GTZC_S_Init 1 */
 
   /* USER CODE END GTZC_S_Init 1 */
+  MPCWM_Area_Desc.AreaId = GTZC_TZSC_MPCWM_ID1;
+  MPCWM_Area_Desc.Offset = 0x0;
+  MPCWM_Area_Desc.Length = 0x20000;
+  MPCWM_Area_Desc.Attribute = GTZC_TZSC_MPCWM_REGION_NSEC|GTZC_TZSC_MPCWM_REGION_PRIV;
+  MPCWM_Area_Desc.Lock = GTZC_TZSC_MPCWM_LOCK_OFF;
+  MPCWM_Area_Desc.AreaStatus = ENABLE;
+  if (HAL_GTZC_TZSC_MPCWM_ConfigMemAttributes(FMC_BANK1, &MPCWM_Area_Desc) != HAL_OK)
+  {
+    Error_Handler();
+  }
   MPCBB_Area_Desc.SecureRWIllegalMode = GTZC_MPCBB_SRWILADIS_ENABLE;
   MPCBB_Area_Desc.InvertSecureState = GTZC_MPCBB_INVSECSTATE_NOT_INVERTED;
   MPCBB_Area_Desc.AttributeConfig.MPCBB_SecConfig_array[0] =   0x00000000;
