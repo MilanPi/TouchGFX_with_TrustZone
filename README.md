@@ -1,8 +1,11 @@
 # Create and debug TouchGFX application with in Secure and Non-Secure project setup
 
+Prerequisites:
 - STM32CubeMX(1)
 - STM32CubeIDE
 - STM32H573I-DK
+
+In this repository you fill find complete working project tested on STM32H573I-DK board.
 
 ## Configure the Option Bytes
 
@@ -11,7 +14,9 @@ At first, it is needed to prepare STM32H5 device and configure its ***Option Byt
 1) Connect the board to the PC.
 2) Open STM32CubeProgrammer GUI.
 3) Connect to the STM32H573.
-3) Activate TZ (TrustZone®) ***TZEN*** == B4 and ***Flash Water Mark*** for Flash ***Bank 1*** (Secure) and ***Bank2*** (Non-Secure)
+4) Activate TZ (TrustZone®) ***TZEN*** == B4 and ***Flash Water Mark*** for Flash ***Bank 1*** (Secure) and ***Bank2*** (Non-Secure)*
+
+(*) keeping the _STRT value greater than _END value means sector disabled. See the picture bellow and Bank2 configuration.
 
 ![](imgs/programmer.png)
 
@@ -103,3 +108,31 @@ We must generate project in the TouchGFX Designer to have complete project.
 ![](imgs/TouchGFXDesignergenerate.png)
 
 4) You should see green label at the bottom status bar informing about successfull generation.
+
+## Adjust avaliable heap and stack size
+
+TouchGFX application would require more memory than default values for heap and stack size. Enlarge stack and heap size in non-secure application linker file.
+
+```c
+_Min_Heap_Size  = 0x800;      /* required amount of heap  */
+_Min_Stack_Size = 0x1000;     /* required amount of stack */
+```
+
+![](imgs/heapandstack.png)
+
+Be aware that the linker file can be re-generated (reverted) to default value when you re-generate the project in the CubeMX.
+
+## MPCWM settings in GTZC (Global TZ Controller)
+
+By default all externall memories address ranges are allocated for secure world.The FMC Bank1 address space will not be working until we enable the access for non-secure application. To enable it we need to configure MPCWM (Memory Protection Controller - Watermark Based) in CubeMX under GTZC_S section.
+
+![](imgs/MPCWM.png)
+
+## GPDMA settings
+
+You need to change the GPDMA channel security attribute to "Priviledged"
+
+![](imgs/GPDMA_priviledged.png)
+
+---
+By default (default CubeMX settings) every SRAM region is secure and there is allocated unneccessary amount of SRAM for secure application and only part of available SRAM for non-secure application. The allocated SRAM for secure application can be reduced allowing more SRAM to be allocated to non-secure application (by adjusting linker file and Block-Based Memory Protection Contrloller tab in MX in GTZC_S).
