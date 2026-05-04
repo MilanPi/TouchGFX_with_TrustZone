@@ -111,16 +111,11 @@ We must generate project in the TouchGFX Designer to have complete project.
 
 ## Adjust avaliable heap and stack size
 
-TouchGFX application would require more memory than default values for heap and stack size. Enlarge stack and heap size in non-secure application linker file.
+TouchGFX application would require more RAM memory than default values for heap and stack size. Enlarge stack and heap size for non-secure application in CubeMX Project Manager.
 
-```c
-_Min_Heap_Size  = 0x800;      /* required amount of heap  */
-_Min_Stack_Size = 0x1000;     /* required amount of stack */
-```
+![](imgs/MX_heapStack.png)
 
-![](imgs/heapandstack.png)
-
-Be aware that the linker file can be re-generated (reverted) to default value when you re-generate the project in the CubeMX.
+Be aware that if you modify the linker file manually then it will be re-generated (reverted) to default values when you re-generate the project in the CubeMX.
 
 ## MPCWM settings in GTZC (Global TZ Controller)
 
