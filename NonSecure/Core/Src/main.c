@@ -240,7 +240,7 @@ static void MX_GPDMA2_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA2_Channel6, DMA_CHANNEL_NPRIV) != HAL_OK)
+  if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA2_Channel6, DMA_CHANNEL_PRIV) != HAL_OK)
   {
     Error_Handler();
   }
