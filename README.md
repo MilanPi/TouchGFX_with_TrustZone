@@ -87,7 +87,23 @@ Solve the Dependencies error. The TouchGFX needs to have available CRC periphera
 
 ![](imgs/ActivateCRC.png)
 
-You can change display width and height and set framebuffer (FB) strategy to Partial FB.
+Activate the FMC
+
+The display on STM32H573I-DK board is connected with 16-bit data bus. To interface this display (equipped with Sitronix ST7789H2 controller) we can use FMC peripheral with LCD mode.
+
+Configure the FMC according to the pictures bellow:
+
+![](imgs/MX_FMC_1.png)
+
+Adjust pin assignment according the picture bellow (some of the dedicated pins would need to be moved to alternate position). All the pins, as FMC peripheral itself, belongs to the non-secure world:
+
+![](imgs/MX_FMC_pins.png)
+
+Adjust TouchGFX configuration in CubeMX
+
+Once we have activated the FMC controller, we can adjust configuration in the CubeMX for TouchGFX middleware to use FMC.
+
+![](imgs/CubeMX_TGFX_FMC.png)
 
 If you generate by CubeMX the project now (just enabling TouchGFX and CRC) and then try to build the project, you will receive an errors, because the project is not complete.
 
@@ -103,11 +119,35 @@ We must generate project in the TouchGFX Designer to have complete project.
 
 ![](imgs/TouchGFXDesigner-BlankUI.png)
 
-3) Now just click Generate button (or press F4) to generate TouchGFX project.
+3) Add some basic shapes on the screen (canvas) to see later at least something on the display. You can put a white rectangle and spread it across all the screen to create a white background and then place somewhere a circle of any color.
+
+![](imgs/TouchGFXDesigner_canvas.png)
+
+4) Now just click Generate button (or press F4) to generate TouchGFX project.
 
 ![](imgs/TouchGFXDesignergenerate.png)
 
-4) You should see green label at the bottom status bar informing about successfull generation.
+5) You should see green label at the bottom status bar informing about successfull generation.
+
+![](imgs/TouchGFXDesigner-success.png)
+
+At this point the TouchGFX application will not be showing anything on the display and would require some more adjustments.
+
+## GPIOs
+
+We need to add some more GPIOs to handle display correctly. Configure the GPIO pins with the given **User Labels**.
+
+1) The pin enabling power to display **PC6** (with label "**LCD_DISP**"). Default GPIO output level **Low** means the display will have a power just after initialization of this pin.
+
+2) Input pin catching tearing effect (TE) signal from the display **PD3** (put there label "**LCD_TE**"). We need to enable **GPIO_EXTI3** on this pin to catch interrupts from the display TE pin.
+![](imgs/EXTI3.png)
+
+3) The pin controlling the display reset line **PH13** (with label "**LCD_RESET**").
+
+4) The pin controlling the backlight **PI3** (with label "**LCD_BL_CTRL**"). Nothing special here, we just configure the pin with the **GPIO output level** to be **High** which means that after the pin initialization the backlight will be on.
+
+See the summary bellow:
+![](imgs/GPIOs.png)
 
 ## Adjust avaliable heap and stack size
 
@@ -115,11 +155,11 @@ TouchGFX application would require more RAM memory than default values for heap 
 
 ![](imgs/MX_heapStack.png)
 
-Be aware that if you modify the linker file manually then it will be re-generated (reverted) to default values when you re-generate the project in the CubeMX.
+Be aware that if you modify the linker file manually in the linker file then it will be re-generated (reverted) to default values when you re-generate the project in the CubeMX.
 
 ## MPCWM settings in GTZC (Global TZ Controller)
 
-By default all externall memories address ranges are allocated for secure world.The FMC Bank1 address space will not be working until we enable the access for non-secure application. To enable it we need to configure MPCWM (Memory Protection Controller - Watermark Based) in CubeMX under GTZC_S section.
+By default all externall memories address ranges are allocated for secure world. The FMC Bank1 address space will not be working until we enable the access for non-secure application. To enable it we need to configure MPCWM (Memory Protection Controller - Watermark Based) in CubeMX under GTZC_S section.
 
 ![](imgs/MPCWM.png)
 
