@@ -51,12 +51,12 @@ Double check **enabled** secure watermark area applied for **Bank1 (0x0 to 0x7f 
 6) Set **HCLK** to maximum frequency **250** MHz. Just put value 250 in HCLK box, confirm by pressing enter and let the **STM32CubeMX** do the job to find the solution.
 ![](imgs/CLK250MHz.png)
 
-7) Give the project some name and don't forgot to **uncheck** "**Generate Under Root**" (this is required by TouchGFX project which will be added later. TouchGFX generator needs to touch .cprojet file and if generated under root, TouchGFX will not find that project file resulting in an error after code generation in TouchGFX Designer). As a toolchain select **STM32CubeIDE**. Click the button **Generate Code**.
+7) Give the project some name and don't forgot to **uncheck** "**Generate Under Root**" (this is required by TouchGFX project which will be added later. TouchGFX generator needs to touch .cproject file and if generated under root, TouchGFX will not find that project file resulting in an error after code generation in TouchGFX Designer). As a toolchain select **STM32CubeIDE**. Click the button **Generate Code**.
 ![](imgs/UnderRoot.png)
 
 ## Open the project in STM32CubeIDE
 
-The STM32CubeMX creates hiearchical project with root project with the given name and two subprojects with given name and _Secure and _NonSecure suffixes.
+STM32CubeMX created a hierarchical project with a root project with the given name and two subprojects with the given name and the _Secure and _NonSecure suffixes
 
 ![](imgs/SecNonSec.png)
 
@@ -108,16 +108,16 @@ When you run debug next time, be sure to select Secure project when launching de
 3) Then we need to activate **TouchGFX** middleware.
 ![](imgs/EnableTGFX.png)
 
-4) Solve the Dependencies error. The **TouchGFX** needs to have available **CRC** peripheral to proper function. You don't need to configure the **CRC** peripheral, just activate it using check box. **CRC** belongs to **non secure** context.
+4) Solve the **Dependencies error**. The **TouchGFX** needs to have available **CRC** peripheral to proper function. You don't need to configure the **CRC** peripheral, just activate it using check box. **CRC** belongs to **non secure** context.
 ![](imgs/ActivateCRC.png)
 
-5) Activate the **FMC** for **non secure** context. The display on **STM32H573I-DK** board is connected with 16-bit data bus. To interface this display (Sitronix ST7789H2 controller) we can use **FMC** peripheral with LCD mode. Configure the **FMC** according to the pictures bellow. Disable the **Write FIFO**.
+5) Activate the **FMC** for **non secure** context. The display on **STM32H573I-DK** board is connected with 16-bit data bus. To interface this display (Sitronix ST7789H2 controller) we can use **FMC** peripheral with **LCD mode**. Disable the **Write FIFO**. Configure the **FMC** according to the picture bellow. 
 ![](imgs/MX_FMC_1.png)
 
-6) Check the **FMC** pin assignment according the picture bellow, sorted by **Signal name** (move pins to alternate position if needed to be inline with picture). All the pins, as **FMC** peripheral itself, belongs to the **non secure** context.
+6) Check the **FMC** pin assignment sorted by **Signal name** (move pins to alternate position if needed to be inline with the picture bellow). All the pins, as **FMC** peripheral itself, belongs to the **non secure** context.
 ![](imgs/MX_FMC_pins.png)
 
-7) Adjust **TouchGFX** configuration in **STM32CubeMX**. Once we have activated the **FMC** controller, we can adjust configuration in the **STM32CubeMX** for **TouchGFX** middleware to use **FMC**. Set proper display size (240 x 240 px) and select **double frame buffer** - it will fit inside the internal SRAM (double FB size = 240 x 240 x 2 x 2 = 225 KB)
+7) Adjust **TouchGFX** configuration in **STM32CubeMX**. Once we have activated the **FMC** controller, we can adjust configuration in the **STM32CubeMX** for **TouchGFX** middleware to use **FMC**. Set proper display size (**240 x 240 px**) and select **double frame buffer** - don't worry, it will fit inside the internal SRAM (double FB size = 240 x 240 x 2 x 2 = 225 KB)
 ![](imgs/CubeMX_TGFX_FMC.png)
 
 If you generate the project by **STM32CubeMX** now and then try to build the project, you will receive **expected errors**, because the project is **not complete**.
@@ -131,10 +131,10 @@ We must generate project in the **TouchGFX Designer** to have complete project.
 1) Open the **.touchgfx.part** partial project file located in /NonSecure/TouchGFX/:
 ![](imgs/part.png)
 
-2) This will open the project in the ***TouchGFX Designer***. There you can select ***blank UI*** for initial project and click on ***Import*** button.
+2) This will open the project in the ***TouchGFX Designer***. There you can select ***Blank UI*** for initial project and click on ***Import*** button.
 ![](imgs/TouchGFXDesigner-BlankUI.png)
 
-3) Add some basic shapes on the screen (canvas) to see at least something on the display later. You can put a white rectangle and spread it across all the screen to create a white background and then place somewhere a circle of any color.
+3) Add some basic shapes on the screen (canvas) to see at least something on the display later. You can put a white rectangle and spread it across all the screen to create a white background and then place somewhere a circle of any color.  
 ![](imgs/TouchGFXDesigner_canvas.png)
 
 4) Now just click **Generate button** (or press F4) to generate **TouchGFX** project.
@@ -160,42 +160,41 @@ We need to add some more **GPIOs** to handle display correctly. Configure the GP
 
 1) The pin enabling power to display **PC6** (with label "**LCD_DISP**") - GPIO **output** push/pull. Default **GPIO output level** **Low** means the display will have a power just after initialization of this pin.
 
-2) **Input** pin catching tearing effect (TE) signal from the display **PD3** (put there label "**LCD_TE**"). We need to enable **GPIO_EXTI3** on this pin to catch interrupts from the display TE pin. (**TouchGFX** rendering is triggered by this signal)
-![](imgs/EXTI3.png) 
+2) **Input** pin catching tearing effect (TE) signal from the display **PD3** (put there label "**LCD_TE**"). We need to enable **GPIO_EXTI3** on this pin to catch interrupts from the display TE pin. (**TouchGFX** rendering is triggered by this signal)  
+![](imgs/EXTI3.png)   
 Then go to **NVIC_NS** settings and enable interrupts on **EXTI line 3** by clicking on the checkbox.
 ![](imgs/NVIC_EXTI3.png)
 
 3) The pin controlling the display reset line **PH13** (with label "**LCD_RESET**"). GPIO **output** push/pull with **GPIO output level** **High**.
 
-4) The pin controlling the backlight **PI3** (with label "**LCD_BL_CTRL**"). GPIO **output** push/pull with **GPIO output level** **High** which means that after the pin initialization the display backlight will be on.
+4) The pin controlling the backlight **PI3** (with label "**LCD_BL_CTRL**"). GPIO **output** push/pull with **GPIO output level** - **High** which means that after the pin initialization the display backlight will be on.
 
 See the summary bellow:
 ![](imgs/GPIOs.png)
 
 ## Adjust avaliable heap and stack size
 
-TouchGFX application would require more RAM memory than default values for heap and stack size. Enlarge stack and heap size for non-secure application in STM32CubeMX Project Manager.
+TouchGFX application would require more RAM memory than the default values for the heap and stack size. **Enlarge stack and heap** size for the **non secure** application in STM32CubeMX **Project Manager**.
 
 ![](imgs/MX_heapStack.png)
 
-Be aware that if you modify the linker file manually in the linker file then it will be re-generated (reverted) to default values when you re-generate the project in the STM32CubeMX.
+Be aware that if you modify the linker file manually in the linker file then it will be re-generated (reverted) to default values (or better to say the actual values set in STM32CubeMX) when you re-generate the project next time.
 
 ## MPCWM settings in GTZC (Global TZ Controller)
 
-By default all externall memories address ranges are allocated for secure world. The FMC Bank1 address space will not be working until we enable the access for non-secure application. To enable it we need to configure MPCWM (Memory Protection Controller - Watermark Based) in STM32CubeMX under GTZC_S section.
+By default all external memories address ranges are allocated for **secure** world. The **FMC Bank1** address space will not be working until we enable the access for **non secure** application. To enable it we need to configure **MPCWM** (Memory Protection Controller - Watermark Based) in STM32CubeMX under **GTZC_S** section.
 
-We need to set the very beginning of the **FMC bank 1** address space attribute to **not secure**. The minimum not zero size is 0x20000, let's use this value for **MPCWM2 (FMC_NOR)** and **Area 1**. Check the picture bellow.
+We need to set just the very beginning of the **FMC bank 1** address space to **not secure**. The minimum (not zero) size is **0x20000**, let's use this value for **MPCWM2 (FMC_NOR)** and **Area 1**. Check the picture bellow.
+
 ![](imgs/MPCWM.png)
 
 ## GPDMA settings
 
-**GPDMA2** is used to offload CPU when the FB is transfered to the GRAM of the display through the **FMC** interface. Just select the **GPDMA2 channel 6**. It is enough to activate it. All the configuration is done in the code we will add later.
-
-And one more thing: You need to change the **GPDMA channel 6** security attribute to "**Priviledged**"...
+**GPDMA2** is used to offload the CPU when the FB is transfered to the GRAM of the display through the **FMC** interface. Just select the **GPDMA2 channel 6**. It is enough to activate it. All the configuration is done in the code we will add later. And one more thing: You need to change the **GPDMA channel 6** security attribute to "**Priviledged**"...
 
 ![](imgs/GPDMA_priviledged.png)
 
-... and enable NVIC interrupt for GPDMA2 CH6.
+... and enable **NVIC** interrupt for **GPDMA2 CH6**.
 
 ![](imgs/NVIC_GPDMA2CH6.png)
 
@@ -223,4 +222,4 @@ Build the application (Ctrl + B) in CubeIDE and launch debug or flash the applic
 ---
 
 Note:
-> By default (default STM32CubeMX settings) a huge portion of SRAM memory is allocated for **secure** application which is unnecesary and rest of available SRAM for **non-secure** application. The allocated SRAM for **secure** application can be reduced allowing more SRAM to be allocated to **non-secure** application (by adjusting linker file and **Block-Based Memory Protection Contrloller** tab in STM32CubeMX in **GTZC_S** section).
+> By default (the default STM32CubeMX settings) a huge portion of SRAM memory is allocated for the **secure** application which is unnecesary and the rest of available SRAM for **non-secure** application. The allocated SRAM for **secure** application can be reduced allowing more SRAM to be allocated to **non-secure** application (by adjusting linker file and **Block-Based Memory Protection Contrloller** tab in STM32CubeMX in **GTZC_S** section).
