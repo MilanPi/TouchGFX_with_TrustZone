@@ -11,7 +11,7 @@ This tutorial guides you through a process of creation a **TouchGFX** applicatio
 
 In this repository you will find a complete working project tested on the **STM32H573I-DK** board. If you don't want to follow the tutorial, just download the repository, open and build the project.
 
-Note:
+***Note:***
 >The Touch screen handling or external flash memory storage is not implemented in this tutorial to keep the tutorial simpler.
 
 ## Configure the Option Bytes
@@ -128,8 +128,9 @@ We must generate project in the **TouchGFX Designer** to have complete project.
 
 ## Generate TouchGFX project in the TouchGFX Designer
 
-1) Open the **.touchgfx.part** partial project file located in /NonSecure/TouchGFX/:
+1) Open the **ApplicationTemplate.touchgfx.part** partial project file located in /NonSecure/TouchGFX/:
 ![](imgs/part.png)
+
 
 2) This will open the project in the ***TouchGFX Designer***. There you can select ***Blank UI*** for initial project and click on ***Import*** button.
 ![](imgs/TouchGFXDesigner-BlankUI.png)
@@ -142,6 +143,11 @@ We must generate project in the **TouchGFX Designer** to have complete project.
 
 5) You should see green label at the bottom status bar informing about successfull generation.
 ![](imgs/TouchGFXDesigner-success.png)
+
+
+***Note:***
+> The **TouchGFX Designer** has also generated final **.touchgfx** project file in the same folder next to the partial **ApplicationTemplate.touchgfx.part** file. Use **.touchgfx** final project file for opening your TouchGFX project next time.
+![](imgs/TGFXprjfile.png)
 
 At this point we are **able to build** the application **without any error**. If you start debugging, you will see running **TouchGFX** application. But the **TouchGFX** application will not be showing anything on the display and requires some more adjustments. 
 
@@ -221,5 +227,5 @@ Build the application (Ctrl + B) in CubeIDE and launch debug or flash the applic
 
 ---
 
-Note:
+***Note:***
 > By default (the default STM32CubeMX settings) a huge portion of SRAM memory is allocated for the **secure** application which is unnecesary and the rest of available SRAM for **non-secure** application. The allocated SRAM for **secure** application can be reduced allowing more SRAM to be allocated to **non-secure** application (by adjusting linker file and **Block-Based Memory Protection Contrloller** tab in STM32CubeMX in **GTZC_S** section).
