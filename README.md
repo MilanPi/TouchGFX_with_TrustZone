@@ -146,7 +146,7 @@ We must generate project in the **TouchGFX Designer** to have complete project.
 
 
 ***Note:***
-> The **TouchGFX Designer** has also generated final **.touchgfx** project file in the same folder next to the partial **ApplicationTemplate.touchgfx.part** file. Use **.touchgfx** final project file for opening your TouchGFX project next time.
+> The **TouchGFX Designer** has also generated final **.touchgfx** project file in the same folder next to the partial **ApplicationTemplate.touchgfx.part** file. Use **.touchgfx** final project file for opening your TouchGFX project next time.    
 ![](imgs/TGFXprjfile.png)
 
 At this point we are **able to build** the application **without any error**. If you start debugging, you will see running **TouchGFX** application. But the **TouchGFX** application will not be showing anything on the display and requires some more adjustments. 
