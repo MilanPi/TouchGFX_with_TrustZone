@@ -11,6 +11,19 @@ This tutorial guides you through a process of creation a **TouchGFX** applicatio
 
 In this repository you will find a complete working project tested on the **STM32H573I-DK** board. If you don't want to follow the tutorial, just download the repository, open and build the project.
 
+The **secure** application is located in **Flash Bank 1** (1MB) and basically do only an initialization of GTZC or other initialization and then **jumps** to **non secure** application. Non secure application do all the rest of functionality and is located in the **Flash Bank 2** (1MB).
+```
+     Flash Bank 1               Flash Bank 2
+   +---------------+          +---------------+
+   |  Secure part  |          |  NonSec part  |
+   |               |          |               |
+   |               |          | TouchGFX      |
+   |               |          | CRC           |
+   | init sec attr |          | FMC           |
+   | jump to NS    |          | GPIOs         |
+   +---------------+          +---------------+
+```
+
 ***Note:***
 >The Touch screen handling or external flash memory storage is not implemented in this tutorial to keep the tutorial simpler.
 
@@ -182,9 +195,16 @@ See the summary bellow:
 
 TouchGFX application would require more RAM memory than the default values for the heap and stack size. **Enlarge stack and heap** size for the **non secure** application in STM32CubeMX **Project Manager**.
 
+```
+M33NS
+     Minimum Heap Size  = 0x800
+     Minimum Stack Size = 0x1000
+```
+
 ![](imgs/MX_heapStack.png)
 
-Be aware that if you modify the linker file manually in the linker file then it will be re-generated (reverted) to default values (or better to say the actual values set in STM32CubeMX) when you re-generate the project next time.
+***Note:***
+> Be aware that if you modify the values manually in the linker file then they will be re-generated (reverted) to default values (or better to say, to the actual values set in STM32CubeMX) when you re-generate the project next time.
 
 ## MPCWM settings in GTZC (Global TZ Controller)
 
@@ -223,7 +243,7 @@ Build the application (Ctrl + B) in CubeIDE and launch debug or flash the applic
 **Reminder**: *Don't forget to select firstly **Secure project** before clicking bug icon to launch debug session.* [see here](README.md#setup-debug)
 
 ---
-### Now you should see finally your screen layout on the display.
+### Now you should see finally your screen layout on the display!
 
 ---
 
