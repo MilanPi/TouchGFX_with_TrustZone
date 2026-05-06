@@ -11,7 +11,7 @@ This tutorial guides you through a process of creation a **TouchGFX** applicatio
 
 In this repository you will find a complete working project tested on the **STM32H573I-DK** board. If you don't want to follow the tutorial, just download the repository, open and build the project.
 
-The **secure** application is located in **Flash Bank 1** (1MB) and basically do only an initialization of GTZC or other initialization and then **jumps** to **non secure** application. Non secure application do all the rest of functionality and is located in the **Flash Bank 2** (1MB).
+The **secure** application is located in **Flash Bank 1** (1MB) and basically does only an initialization of GTZC or other initialization and then **jumps** to **non secure** application. **Non secure** application does all the rest of functionality and is located in the **Flash Bank 2** (1MB).
 ```
      Flash Bank 1               Flash Bank 2
    +---------------+          +---------------+
@@ -25,13 +25,15 @@ The **secure** application is located in **Flash Bank 1** (1MB) and basically do
 ```
 
 ***Note:***
->The Touch screen handling or external flash memory storage is not implemented in this tutorial to keep the tutorial simpler.
+>The touch screen handling or external flash memory storage is not implemented in this tutorial to keep the tutorial simpler.
+
+>The tutorial is not aiming on application memory layout optimization.
 
 ## Configure the Option Bytes
 
 At first, it is needed to prepare STM32H5 device and configure its ***Option Bytes*** to be able to run secure and non-secure application.
 
-1) Connect the board to the PC using USB-C cable.
+1) Connect the board **to the PC** using **USB-C** cable.
 2) Open **STM32CubeProgrammer** GUI.
 3) Connect to the STM32H573 by clicking green **Connect** button.
 4) Go to **OB** icon (left vertical bar) and activate TZ: ***TZEN*** == B4 and ***Flash Water Mark*** for Flash ***Bank 1*** (Secure) and ***Bank2*** (Non-Secure)*
@@ -94,7 +96,7 @@ int main(void)
 
 ### Setup Debug
 
-1) Click with **right mouse button** on _Secure project and select **Debug As** > **STM32 C/C++ Application**
+1) In the **Project Explorer**, click with **right mouse button** on **Secure** project and select **Debug As** > **STM32 C/C++ Application**
 
 2) In the **debug Configuration** click on **Startup** tab and add a **NonSecure image** in **Load Image and Symbols** list. Change **Build Configuration** to **Debug** for NonSecure project. Keep the rest untouched.
 ![](imgs/DebugSetup.png)
@@ -112,25 +114,27 @@ When you run debug next time, be sure to select Secure project when launching de
 
 ## Add TouchGFX SW packgage X-CUBE-TouchGFX
 
-1) Go to **Software Packs** drop down menu and click **Select Components** option.
+1) Open again **STM32CubeMX**.
+
+2) Go to **Software Packs** drop down menu and click **Select Components** option.
 ![](imgs/OpenSWPacks.png)
 
-2) In the **Software Packs Component Selector** be sure to select **Cortex-M33 non secure** context because the **TouchGFX** can run only in **non secure** context.
+3) In the **Software Packs Component Selector** be sure to select **Cortex-M33 non secure** context because the **TouchGFX** can run only in **non secure** context.
 ![](imgs/SWPacksTGFX.png)
 
-3) Then we need to activate **TouchGFX** middleware.
+4) Then we need to activate **TouchGFX** middleware.
 ![](imgs/EnableTGFX.png)
 
-4) Solve the **Dependencies error**. The **TouchGFX** needs to have available **CRC** peripheral to proper function. You don't need to configure the **CRC** peripheral, just activate it using check box. **CRC** belongs to **non secure** context.
+5) Solve the **Dependencies error**. The **TouchGFX** needs to have available **CRC** peripheral to proper function. You don't need to configure the **CRC** peripheral, just activate it using check box. **CRC** belongs to **non secure** context.
 ![](imgs/ActivateCRC.png)
 
-5) Activate the **FMC** for **non secure** context. The display on **STM32H573I-DK** board is connected with 16-bit data bus. To interface this display (Sitronix ST7789H2 controller) we can use **FMC** peripheral with **LCD mode**. Disable the **Write FIFO**. Configure the **FMC** according to the picture bellow. 
+6) Activate the **FMC** for **non secure** context. The display on **STM32H573I-DK** board is connected with 16-bit data bus. To interface this display (Sitronix ST7789H2 controller) we can use **FMC** peripheral with **LCD mode**. Disable the **Write FIFO**. Configure the **FMC** according to the picture bellow. 
 ![](imgs/MX_FMC_1.png)
 
-6) Check the **FMC** pin assignment sorted by **Signal name** (move pins to alternate position if needed to be inline with the picture bellow). All the pins, as **FMC** peripheral itself, belongs to the **non secure** context.
+7) Check the **FMC** pin assignment sorted by **Signal name** (move pins to alternate position if needed to be inline with the picture bellow). All the pins, as **FMC** peripheral itself, belongs to the **non secure** context.
 ![](imgs/MX_FMC_pins.png)
 
-7) Adjust **TouchGFX** configuration in **STM32CubeMX**. Once we have activated the **FMC** controller, we can adjust configuration in the **STM32CubeMX** for **TouchGFX** middleware to use **FMC**. Set proper display size (**240 x 240 px**) and select **double frame buffer** - don't worry, it will fit inside the internal SRAM (double FB size = 240 x 240 x 2 x 2 = 225 KB)
+8) Adjust **TouchGFX** configuration in **STM32CubeMX**. Once we have activated the **FMC** controller, we can adjust configuration in the **STM32CubeMX** for **TouchGFX** middleware to use **FMC**. Set proper display size (**240 x 240 px**) and select **double frame buffer** - don't worry, it will fit inside the internal SRAM (double FB size = 240 x 240 x 2 x 2 = 225 KB)
 ![](imgs/CubeMX_TGFX_FMC.png)
 
 If you generate the project by **STM32CubeMX** now and then try to build the project, you will receive **expected errors**, because the project is **not complete**.
@@ -141,14 +145,16 @@ We must generate project in the **TouchGFX Designer** to have complete project.
 
 ## Generate TouchGFX project in the TouchGFX Designer
 
-1) Open the **ApplicationTemplate.touchgfx.part** partial project file located in /NonSecure/TouchGFX/:
-![](imgs/part.png)
+1) Open (double click) the **ApplicationTemplate.touchgfx.part** partial project file located in /NonSecure/TouchGFX/:
+![](imgs/part.png)  
 
+***Note:***
+> If you open the partial project file using Open project dialog in TouchGFX Designer, the next step (Import GUI) is skipped by TouchGFX Designer and Blank UI is automatically used.
 
-2) This will open the project in the ***TouchGFX Designer***. There you can select ***Blank UI*** for initial project and click on ***Import*** button.
+2) This will open the project in the ***TouchGFX Designer***. There you can select ***Blank UI*** for initial project and click on ***Import*** button.    
 ![](imgs/TouchGFXDesigner-BlankUI.png)
 
-3) Add some basic shapes on the screen (canvas) to see at least something on the display later. You can put a white rectangle and spread it across all the screen to create a white background and then place somewhere a circle of any color.  
+3) Add some basic shapes on the screen (canvas) to see at least something on the display later. You can put a white rectangle (a ***Box*** widget) and spread it across all the screen to create a white background and then place somewhere a **Circle** widget of any color.  
 ![](imgs/TouchGFXDesigner_canvas.png)
 
 4) Now just click **Generate button** (or press F4) to generate **TouchGFX** project.
@@ -159,7 +165,7 @@ We must generate project in the **TouchGFX Designer** to have complete project.
 
 
 ***Note:***
-> The **TouchGFX Designer** has also generated final **.touchgfx** project file in the same folder next to the partial **ApplicationTemplate.touchgfx.part** file. Use **.touchgfx** final project file for opening your TouchGFX project next time.    
+> The **TouchGFX Designer** has also generated final **.touchgfx** project file in the same folder next to the partial **ApplicationTemplate.touchgfx.part** file. Use the **.touchgfx** final project file for opening your TouchGFX project next time.    
 ![](imgs/TGFXprjfile.png)
 
 At this point we are **able to build** the application **without any error**. If you start debugging, you will see running **TouchGFX** application. But the **TouchGFX** application will not be showing anything on the display and requires some more adjustments. 
@@ -175,18 +181,24 @@ Before we proceed further, **remove** or comment out **testing code** in the mai
 
 ## GPIOs
 
-We need to add some more **GPIOs** to handle display correctly. Configure the GPIO pins with the given **User Labels**.
+We need to add some more **GPIOs** to handle display correctly. 
 
-1) The pin enabling power to display **PC6** (with label "**LCD_DISP**") - GPIO **output** push/pull. Default **GPIO output level** **Low** means the display will have a power just after initialization of this pin.
+Configure the GPIO pins with the given **User Labels**.
 
-2) **Input** pin catching tearing effect (TE) signal from the display **PD3** (put there label "**LCD_TE**"). We need to enable **GPIO_EXTI3** on this pin to catch interrupts from the display TE pin. (**TouchGFX** rendering is triggered by this signal)  
+All the GPIO pins belong to **non secure** context. Don't leave these GPIO pins context **Free**.
+
+1) Open again **STM32CubeMX**
+
+2) The pin enabling power to display **PC6** (with label "**LCD_DISP**") - GPIO **output** push/pull. Default **GPIO output level** **Low** means the display will have a power just after initialization of this pin.
+
+3) **Input** pin catching tearing effect (TE) signal from the display **PD3** (put there label "**LCD_TE**"). We need to enable **GPIO_EXTI3** on this pin to catch interrupts from the display TE pin. (**TouchGFX** rendering is triggered by this signal)  
 ![](imgs/EXTI3.png)   
 Then go to **NVIC_NS** settings and enable interrupts on **EXTI line 3** by clicking on the checkbox.
 ![](imgs/NVIC_EXTI3.png)
 
-3) The pin controlling the display reset line **PH13** (with label "**LCD_RESET**"). GPIO **output** push/pull with **GPIO output level** **High**.
+4) The pin controlling the display reset line **PH13** (with label "**LCD_RESET**"). GPIO **output** push/pull with **GPIO output level** **High**.
 
-4) The pin controlling the backlight **PI3** (with label "**LCD_BL_CTRL**"). GPIO **output** push/pull with **GPIO output level** - **High** which means that after the pin initialization the display backlight will be on.
+5) The pin controlling the backlight **PI3** (with label "**LCD_BL_CTRL**"). GPIO **output** push/pull with **GPIO output level** - **High** which means that after the pin initialization the display backlight will be on.
 
 See the summary bellow:
 ![](imgs/GPIOs.png)
